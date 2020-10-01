@@ -1,35 +1,46 @@
 use std::fs;
 
 fn main() {
-    let mut numbers = read_file();
+    let initial_numbers = read_file();
 
-    let mut curr_index = 0usize;
-    numbers[1] = 12;
-    numbers[2] = 2;
     loop {
-        let op = numbers[curr_index];
-        match op {
-            1 => {
-                let op1 = numbers[curr_index + 1];
-                let op2 = numbers[curr_index + 2];
-                let op3 = numbers[curr_index + 3];
-                numbers[op3 as usize] = numbers[op1 as usize] + numbers[op2 as usize];
-                curr_index += 4;
+        for noun in 0..100 {
+            for verb in 0..100 {
+                let mut curr_index = 0usize;
+                let mut numbers = initial_numbers.clone();
+                numbers[1] = noun;
+                numbers[2] = verb;
+                loop {
+                    let op = numbers[curr_index];
+                    match op {
+                        1 => {
+                            let op1 = numbers[curr_index + 1];
+                            let op2 = numbers[curr_index + 2];
+                            let op3 = numbers[curr_index + 3];
+                            numbers[op3 as usize] = numbers[op1 as usize] + numbers[op2 as usize];
+                            curr_index += 4;
+                        }
+                        2 => {
+                            let op1 = numbers[curr_index + 1];
+                            let op2 = numbers[curr_index + 2];
+                            let op3 = numbers[curr_index + 3];
+                            numbers[op3 as usize] = numbers[op1 as usize] * numbers[op2 as usize];
+                            curr_index += 4;
+                        }
+                        99 => {
+                            break;
+                        }
+                        _ => unreachable!(),
+                    }
+                }
+                if numbers[0] == 19690720 {
+                    println!("DONE! Correct number FOUND: {}", numbers[0]);
+                    println!("DONE! Correct number FOUND: {}", 100 * noun + verb);
+                    return;
+                }
             }
-            2 => {
-                let op1 = numbers[curr_index + 1];
-                let op2 = numbers[curr_index + 2];
-                let op3 = numbers[curr_index + 3];
-                numbers[op3 as usize] = numbers[op1 as usize] * numbers[op2 as usize];
-                curr_index += 4;
-            }
-            99 => {
-                break;
-            }
-            _ => unreachable!(),
         }
     }
-    println!("{}", numbers[0])
 }
 
 fn read_file() -> Vec<u32> {
