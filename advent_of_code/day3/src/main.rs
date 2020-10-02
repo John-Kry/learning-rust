@@ -12,9 +12,6 @@ impl Coordinate {
         let string: String = "x".to_owned() + &self.x.to_string() + "y" + &self.y.to_string();
         return string;
     }
-    fn distance_from_origin(self) -> i32 {
-        return self.x.abs() + self.y.abs();
-    }
 }
 fn main() {
     let directions = read_file();
@@ -30,51 +27,49 @@ fn main() {
     let line_one_steps = 0;
     while curr_index < line_one.len() {
         // println!("{}", line_one[curr_index]);
-        let mut segment_points: Vec<Coordinate> = calculate_change(
-            line_one[curr_index].clone(),
-            current_coordinate,
-            line_one_steps,
-        );
+        let mut segment_points: Vec<Coordinate> =
+            calculate_change(line_one[curr_index].clone(), current_coordinate);
         println!("{}", line_one_steps);
         current_coordinate = *segment_points.last().unwrap();
         line_one_coords.append(&mut segment_points);
         curr_index = curr_index + 1;
     }
 
-    let line_two_steps = 0;
-    let mut closest_distance = i32::MAX;
+    let mut steps = i32::MAX;
     let mut curr_index = 0usize;
-    let mut current_coordinate = Coordinate { x: 0, y: 0 };
+    let mut current_coordinate = Coordinate {
+        x: 0,
+        y: 0,
+        steps: 0,
+    };
     let mut line_two_coords: Vec<Coordinate> = Vec::new();
     while curr_index < line_two.len() {
         println!("{}", line_two[curr_index]);
-        let mut segment_points: Vec<Coordinate> = calculate_change(
-            line_two[curr_index].clone(),
-            current_coordinate,
-            line_two_steps,
-        );
+        let mut segment_points: Vec<Coordinate> =
+            calculate_change(line_two[curr_index].clone(), current_coordinate);
         current_coordinate = *segment_points.last().unwrap();
         line_two_coords.append(&mut segment_points);
         curr_index = curr_index + 1;
         // println!("curr x={}, curr y ={}", currx, curry);
     }
-    let mut line_two_x_to_y: HashMap<String, bool> = HashMap::new();
+    let mut line_two_x_to_y: HashMap<String, i32> = HashMap::new();
     for line_two_coord in &line_two_coords {
-        line_two_x_to_y.insert(line_two_coord.coord_to_string(), true);
+        line_two_x_to_y.insert(line_two_coord.coord_to_string(), line_two_coord.steps);
     }
     println!("time to loop");
     for line_one_coord in &line_one_coords {
         match line_two_x_to_y.get(&line_one_coord.coord_to_string()) {
-            Some(_) => {
+            Some(coordinate_steps) => {
                 println!("MATCH: {},{}", line_one_coord.x, line_one_coord.y);
-                if line_one_coord.distance_from_origin() < closest_distance {
-                    closest_distance = line_one_coord.distance_from_origin();
+                let current_total_steps = *coordinate_steps + line_one_coord.steps;
+                if current_total_steps < steps {
+                    steps = current_total_steps;
                 }
             }
             None => {}
         };
     }
-    println!("lowest num = {}", closest_distance);
+    println!("lowest steps:{}", steps);
 }
 
 fn read_file() -> (Vec<String>, Vec<String>) {
@@ -87,36 +82,36 @@ fn read_file() -> (Vec<String>, Vec<String>) {
     let line_two_vec: Vec<String> = line_two.map(|n| n.parse::<String>().unwrap()).collect();
     return (line_one_vec, line_two_vec);
 }
-fn calculate_change(input: String, mut coordinate: Coordinate, mut steps: i32) -> Vec<Coordinate> {
+fn calculate_change(input: String, mut coordinate: Coordinate) -> Vec<Coordinate> {
     let step_count: String = input[1..].to_string();
     let step_count = step_count.parse::<i32>().unwrap();
     let mut segment_points: Vec<Coordinate> = Vec::new();
     if input.starts_with("R") {
         for _i in 0..step_count {
             coordinate.x = coordinate.x + 1;
+            coordinate.steps = coordinate.steps + 1;
             segment_points.push(coordinate);
-            steps = steps + 1;
         }
         return segment_points;
     } else if input.starts_with("L") {
         for _i in 0..step_count {
             coordinate.x = coordinate.x - 1;
+            coordinate.steps = coordinate.steps + 1;
             segment_points.push(coordinate);
-            steps = steps + 1;
         }
         return segment_points;
     } else if input.starts_with("U") {
         for _i in 0..step_count {
             coordinate.y = coordinate.y + 1;
+            coordinate.steps = coordinate.steps + 1;
             segment_points.push(coordinate);
-            steps = steps + 1;
         }
         return segment_points;
     } else {
         for _i in 0..step_count {
             coordinate.y = coordinate.y - 1;
+            coordinate.steps = coordinate.steps + 1;
             segment_points.push(coordinate);
-            steps = steps + 1;
         }
         return segment_points;
     }
