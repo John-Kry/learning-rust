@@ -13,51 +13,56 @@ impl Coordinate {
         return string;
     }
 }
+struct Line {
+    coordinates: Vec<Coordinate>,
+    curr_index: usize,
+}
+impl Line {
+    fn generate_points(&mut self, line: Vec<String>) {
+        let mut current_coordinate = Coordinate {
+            x: 0,
+            y: 0,
+            steps: 0,
+        };
+        while self.curr_index < line.len() {
+            // println!("{}", line[curr_index]);
+            let mut segment_points: Vec<Coordinate> =
+                calculate_change(line[self.curr_index].clone(), current_coordinate);
+            current_coordinate = *segment_points.last().unwrap();
+            self.coordinates.append(&mut segment_points);
+            self.curr_index = self.curr_index + 1;
+            println!("{}", self.curr_index)
+        }
+    }
+}
+struct Grid {
+    line_one: Line,
+    line_two: Line,
+}
+impl Grid {}
 fn main() {
     let directions = read_file();
-    let mut curr_index = 0usize;
-    let line_one = directions.0;
-    let line_two = directions.1;
-    let mut line_one_coords: Vec<Coordinate> = Vec::new();
-    let mut current_coordinate = Coordinate {
-        x: 0,
-        y: 0,
-        steps: 0,
+    let mut grid = Grid {
+        line_one: Line {
+            coordinates: Vec::new(),
+            curr_index: 0,
+        },
+        line_two: Line {
+            coordinates: Vec::new(),
+            curr_index: 0,
+        },
     };
-    let line_one_steps = 0;
-    while curr_index < line_one.len() {
-        // println!("{}", line_one[curr_index]);
-        let mut segment_points: Vec<Coordinate> =
-            calculate_change(line_one[curr_index].clone(), current_coordinate);
-        println!("{}", line_one_steps);
-        current_coordinate = *segment_points.last().unwrap();
-        line_one_coords.append(&mut segment_points);
-        curr_index = curr_index + 1;
-    }
+    grid.line_one.generate_points(directions.0);
+    grid.line_two.generate_points(directions.1);
 
-    let mut steps = i32::MAX;
-    let mut curr_index = 0usize;
-    let mut current_coordinate = Coordinate {
-        x: 0,
-        y: 0,
-        steps: 0,
-    };
-    let mut line_two_coords: Vec<Coordinate> = Vec::new();
-    while curr_index < line_two.len() {
-        println!("{}", line_two[curr_index]);
-        let mut segment_points: Vec<Coordinate> =
-            calculate_change(line_two[curr_index].clone(), current_coordinate);
-        current_coordinate = *segment_points.last().unwrap();
-        line_two_coords.append(&mut segment_points);
-        curr_index = curr_index + 1;
-        // println!("curr x={}, curr y ={}", currx, curry);
-    }
     let mut line_two_x_to_y: HashMap<String, i32> = HashMap::new();
-    for line_two_coord in &line_two_coords {
+    for line_two_coord in grid.line_two.coordinates {
         line_two_x_to_y.insert(line_two_coord.coord_to_string(), line_two_coord.steps);
     }
     println!("time to loop");
-    for line_one_coord in &line_one_coords {
+    let mut steps = i32::MAX;
+
+    for line_one_coord in grid.line_one.coordinates {
         match line_two_x_to_y.get(&line_one_coord.coord_to_string()) {
             Some(coordinate_steps) => {
                 println!("MATCH: {},{}", line_one_coord.x, line_one_coord.y);
